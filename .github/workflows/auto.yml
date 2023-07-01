@@ -1,0 +1,24 @@
+name: Auto Reply to Issues
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  auto-reply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Reply to issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+          REPO_OWNER=$(jq --raw-output .repository.owner.login "$GITHUB_EVENT_PATH")
+          REPO_NAME=$(jq --raw-output .repository.name "$GITHUB_EVENT_PATH")
+          COMMENT_BODY="Thank you for creating the issue! We'll look into it shortly."
+          API_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$ISSUE_NUMBER/comments"
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -d "{\"body\":\"$COMMENT_BODY\"}" "$API_URL"
