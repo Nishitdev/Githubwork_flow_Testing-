@@ -8,14 +8,20 @@ jobs:
   auto-reply:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: |
-          npm install -g github-actions-reply-comment
-
       - name: Reply as Repository Owner
-        run: |
-          GITHUB_TOKEN=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 github-actions-reply-comment --issue-number ${{ github.event.issue.number }} --body "Thank you for creating the issue. We will look into it shortly."
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
+            const response = await github.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: "Thank you for creating the issue. We will look into it shortly."
+            });
+
+            console.log("Reply created:", response);
