@@ -1,4 +1,4 @@
-name: Auto Reply to Issues
+name: Auto Reply on Issue Creation
 on:
   issues:
     types:
@@ -7,17 +7,15 @@ on:
 jobs:
   auto-reply:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Reply to issue
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
+      - name: Install Dependencies
         run: |
-          ISSUE_NUMBER=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
-          COMMENT_BODY="Thank you, @$GITHUB_ACTOR, for creating the issue! We'll look into it shortly."
-          API_URL="https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments"
-          curl -X POST -H "Authorization: token $BOT_TOKEN" -d "{\"body\":\"$COMMENT_BODY\"}" "$API_URL"
+          npm install -g github-actions-reply-comment
+
+      - name: Reply as Repository Owner
+        run: |
+          GITHUB_TOKEN=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 github-actions-reply-comment --issue-number ${{ github.event.issue.number }} --body "Thank you for creating the issue. We will look into it shortly."
+
