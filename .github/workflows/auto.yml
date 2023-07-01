@@ -14,11 +14,10 @@ jobs:
 
       - name: Reply to issue
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           ISSUE_NUMBER=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
-          REPO_OWNER=$(jq --raw-output .repository.owner.login "$GITHUB_EVENT_PATH")
-          REPO_NAME=$(jq --raw-output .repository.name "$GITHUB_EVENT_PATH")
-          COMMENT_BODY="Thank you for creating the issue! We'll look into it shortly."
-          API_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$ISSUE_NUMBER/comments"
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -d "{\"body\":\"$COMMENT_BODY\"}" "$API_URL"
+          COMMENT_BODY="Thank you, @$GITHUB_ACTOR, for creating the issue! We'll look into it shortly."
+          API_URL="https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments"
+          curl -X POST -H "Authorization: token $BOT_TOKEN" -d "{\"body\":\"$COMMENT_BODY\"}" "$API_URL"
